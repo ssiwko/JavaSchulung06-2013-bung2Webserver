@@ -65,6 +65,7 @@ public class ClientHandler implements Runnable {
       }
       buffer.flip();
       charBuffer = charset.decode(buffer);
+      //Crete Helper class for creating an HTTPRequest object containing the Request Type and the content
       String input = charBuffer.toString();
       String[] splitted = input.split(" ");
       if (splitted[0].equalsIgnoreCase("GET")) {
