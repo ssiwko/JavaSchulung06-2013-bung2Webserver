@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+
 /**
  * Copyright 2013 SSI Schaefer PEEM GmbH. All Rights reserved. <br />
  * <br />
@@ -32,11 +33,21 @@ import java.util.concurrent.Executors;
 
 public class SimpleWebServer implements IClientToHandlerInterface {
 
-  private final int port = 80;
+  private final int port;
+  private final String file;
+  private final String charset;
   private boolean hold = false;
   ServerSocketChannel ssc = null;
   List<ClientHandler> handlerList = new ArrayList<>();
   private HashMap<String, String> webSites;
+
+  public SimpleWebServer(String propertyFile) {
+    WebServerConfiguration.getInstance().initialize(propertyFile);
+    // if no value is found with the key, then default value will used
+    this.port = Integer.valueOf(WebServerConfiguration.getInstance().getConfigurationWithDefaultValue("port", "80"));
+    this.charset = WebServerConfiguration.getInstance().getConfigurationWithDefaultValue("charset", "UTF-8");
+    this.file = WebServerConfiguration.getInstance().getConfigurationWithDefaultValue("default", "webroot/index.htm");
+  }
 
   private void init() {
     try {
@@ -64,9 +75,9 @@ public class SimpleWebServer implements IClientToHandlerInterface {
   }
 
   private HashMap<String, String> readHTMLDirectory() {
-	    Charset charset = Charset.forName("ISO-8859-1");
+	    Charset charset = Charset.forName(this.charset);
 	    HashMap<String, String> retVal =  new HashMap<String, String>();
-		File f = new File("webroot/index.htm");
+		File f = new File(this.file);
 		try {
 			FileInputStream fis = new FileInputStream(f);
 			byte[] content = new byte[(int) f.length()];
@@ -101,8 +112,9 @@ private String  addDefaultHeaders(String content) {
   }
 
   public static void main(String[] args) {
-    // TODO Auto-generated method stub
-    SimpleWebServer runner = new SimpleWebServer();
+	  // property file used by webserver
+    String propertyFile = "server.properties";
+    SimpleWebServer runner = new SimpleWebServer(propertyFile);
     runner.init();
   }
 }
