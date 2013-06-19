@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -39,14 +40,18 @@ public class SimpleWebServer implements IClientToHandlerInterface {
   private boolean hold = false;
   ServerSocketChannel ssc = null;
   List<ClientHandler> handlerList = new ArrayList<>();
-  private HashMap<String, String> webSites;
+  private Map<String, String> webSites;
+  
+  private static IWebServerConfiguration config;
 
   public SimpleWebServer(String propertyFile) {
-    WebServerConfiguration.getInstance().initialize(propertyFile);
-    // if no value is found with the key, then default value will used
-    this.port = Integer.valueOf(WebServerConfiguration.getInstance().getConfigurationWithDefaultValue("port", "80"));
-    this.charset = WebServerConfiguration.getInstance().getConfigurationWithDefaultValue("charset", "UTF-8");
-    this.file = WebServerConfiguration.getInstance().getConfigurationWithDefaultValue("default", "webroot/index.htm");
+config = new WebServerConfiguration(propertyFile);
+	  // if no value is found with the key, then default value will used
+    this.port = config.getPort("port", 80);
+    this.charset = config.getConfigurationWithDefaultValue("charset", "UTF-8");
+    this.file = config.getConfigurationWithDefaultValue("default", "webroot/index.htm");
+    
+    this.webSites = config.getSites("site", new HashMap<String, String>());
   }
 
   private void init() {
@@ -55,7 +60,7 @@ public class SimpleWebServer implements IClientToHandlerInterface {
       ssc = ServerSocketChannel.open();
       ssc.configureBlocking(false);
       ssc.bind(socketAddress);
-      webSites = readHTMLDirectory();
+      //webSites = readHTMLDirectory();
       ExecutorService executor = Executors.newFixedThreadPool(5);
       System.out.println("Socket opened waiting for connection");
       while (hold == false) {
@@ -74,7 +79,7 @@ public class SimpleWebServer implements IClientToHandlerInterface {
     }
   }
 
-  private HashMap<String, String> readHTMLDirectory() {
+  /*private HashMap<String, String> readHTMLDirectory() {
 	    Charset charset = Charset.forName(this.charset);
 	    HashMap<String, String> retVal =  new HashMap<String, String>();
 		File f = new File(this.file);
@@ -95,7 +100,8 @@ public class SimpleWebServer implements IClientToHandlerInterface {
 		}
     return retVal;
   }
-private String  addDefaultHeaders(String content) {
+
+  private String  addDefaultHeaders(String content) {
 	  StringBuilder buiString = new StringBuilder();
 	  buiString.append("HTTP/1.1 200 OK \n");
 	  buiString.append("Date"+ new Date().toString()+"\n");
@@ -105,10 +111,18 @@ private String  addDefaultHeaders(String content) {
 	  buiString.append("Content-Length "+ content.length()+"\n");
 	  buiString.append("\n"+content);
 	  return buiString.toString();
-	}
+	}*/
 
   public void removeHandler(ClientHandler handler) {
     this.handlerList.remove(handler);
+  }
+  
+  public static IWebServerConfiguration getConfig() {
+	return config;
+  }
+  
+  public static void setConfig(IWebServerConfiguration config) {
+	SimpleWebServer.config = config;
   }
 
   public static void main(String[] args) {

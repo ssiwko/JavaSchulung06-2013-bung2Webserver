@@ -9,6 +9,7 @@ import java.nio.charset.Charset;
 import java.nio.charset.CharsetDecoder;
 import java.nio.charset.CharsetEncoder;
 import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Copyright 2013 SSI Schaefer PEEM GmbH. All Rights reserved. <br />
@@ -25,7 +26,7 @@ import java.util.HashMap;
 public class ClientHandler implements Runnable {
 
   private SocketChannel channel;
-  private HashMap<String, String> webSites;
+  private Map<String, String> webSites;
   private IClientToHandlerInterface parent;
   CharsetDecoder decoder;
   CharsetEncoder encoder;
@@ -33,7 +34,7 @@ public class ClientHandler implements Runnable {
   CharBuffer charBuffer;
   Charset charset;
 
-  public ClientHandler(SocketChannel channel, HashMap<String, String> webSites, IClientToHandlerInterface parent) {
+  public ClientHandler(SocketChannel channel, Map<String, String> webSites, IClientToHandlerInterface parent) {
     this.channel = channel;
     this.webSites = webSites;
     this.parent = parent;
